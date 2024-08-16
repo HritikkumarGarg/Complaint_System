@@ -11,7 +11,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const atlasConnection = 'mongodb+srv://hritikkumargarg2001:Complain123@complainsystem.upa4l.mongodb.net/complainDB?retryWrites=true&w=majority';
+const dotenv = require('dotenv');     // for .env file
+dotenv.config();
+
+const atlasConnection = process.env.MONGODB_URI;
 
 mongoose.set('strictQuery', true);
 
@@ -25,10 +28,7 @@ mongoose.connect(atlasConnection, {
 
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+
 
 // ROutes use
 app.use('/user', studentRoutes);
@@ -39,4 +39,14 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', function() {
   console.log('MongoDB connected.');
+});
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});
+
+const PORT = process.env.PORT;
+server.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 });
